@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMood - Veterinary Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 20px;
+            color: #1F2937;
+            background-color: #F9FAFB;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #5B21B6, #14B8A6);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            font-size: 30px;
+            margin: 0;
+            font-weight: 600;
+        }
+        .header p {
+            color: #E5E7EB;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .image-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .image-container {
+            background: white;
+            border: 2px solid #14B8A6;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            flex: 0 0 auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .image-container:hover {
+            transform: translateY(-2px);
+        }
+        .image-container img {
+            max-width: 140px;
+            height: auto;
+            display: block;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .image-container p {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: #FBBF24;
+            color: #1F2937;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .assessment, .recommendations {
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #5B21B6;
+        }
+        .assessment h2, .recommendations h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #5B21B6;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .assessment h2::before {
+            content: '🐾';
+            margin-right: 8px;
+        }
+        .recommendations h2.treat::before {
+            content: '🦴';
+            margin-right: 8px;
+        }
+        .recommendations h2.activity::before {
+            content: '🎾';
+            margin-right: 8px;
+        }
+        .assessment p, .recommendations p {
+            font-size: 14px;
+            margin: 10px 0;
+            color: #1F2937;
+        }
+        .assessment ul, .recommendations ul {
+            list-style: none;
+            padding: 0;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .assessment ul li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #E5E7EB;
+        }
+        .assessment ul li:last-child {
+            border-bottom: none;
+        }
+        .recommendations ul li {
+            position: relative;
+            padding: 8px 0 8px 20px;
+        }
+        .recommendations ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #14B8A6;
+        }
+        hr {
+            border: none;
+            border-top: 2px dashed #E5E7EB;
+            margin: 20px 0;
+        }
+        .signature {
+            margin-top: 30px;
+            font-style: italic;
+            color: #4B5563;
+            font-size: 14px;
+            text-align: right;
+        }
+        @media print {
+            body {
+                background: white;
+                margin: 10mm;
+            }
+            .header {
+                background: none;
+                color: #1F2937;
+                box-shadow: none;
+                padding: 10px;
+            }
+            .header p {
+                color: #4B5563;
+            }
+            .image-container {
+                box-shadow: none;
+                border: 1px solid #4B5563;
+            }
+            .image-container p {
+                background: none;
+                color: #1F2937;
+            }
+            .assessment, .recommendations {
+                box-shadow: none;
+                border: 1px solid #4B5563;
+            }
+            .assessment h2, .recommendations h2 {
+                color: #1F2937;
+            }
+            .assessment ul li, .recommendations ul li {
+                color: #1F2937;
+            }
+            .signature {
+                color: #1F2937;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐾 PawMood Veterinary Report</h1>
+        <p>Generated on {{ timestamp }}</p>
+        <p>pawmood.com</p>
+    </div>
+    <hr>
+    <div class="image-row">
+        {% for result in results %}
+            <div class="image-container">
+                <img src="{{ result.image_data }}" alt="Dog Image {{ loop.index }}">
+                <p>{{ result.emotion }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="assessment">
+        <h2>Overall Assessment</h2>
+        <p>Based on the analysis of the provided images, the dog exhibits an overall emotional state of {{ overall_emotion|capitalize }}. The following confidence scores reflect the distribution of detected emotions:</p>
+        <ul>
+            {% for emotion, score in average_confidences.items() %}
+                <li>{{ emotion|capitalize }}: {{ score|round(2) }}%</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="recommendations">
+        <h2 class="treat">Treat Recommendations</h2>
+        <p>
+            {% if overall_emotion|lower == 'happy' %}
+                To support your dog's joyful disposition, I recommend offering nutrient-rich treats that complement their high energy and playful nature. Opt for high-quality, protein-based treats such as peanut butter-filled biscuits or freeze-dried meat rewards. These treats not only satisfy their taste preferences but also provide sustained energy for continued activity. Ensure treats are given in moderation to maintain a balanced diet, ideally comprising no more than 10% of their daily caloric intake.
+            {% elif overall_emotion|lower == 'relaxed' %}
+                Given your dog's calm and serene state, I suggest providing long-lasting, soothing treats that promote sustained relaxation. Soft, herbal-infused treats containing chamomile or valerian root can enhance their tranquil mood. Alternatively, low-calorie dental chews can serve as a gentle reward while supporting oral health. Administer treats in a quiet environment to reinforce their peaceful demeanor.
+            {% elif overall_emotion|lower == 'sad' %}
+                To uplift your dog's subdued mood, I recommend comfort treats designed to stimulate interest and provide emotional reassurance. Soft, flavorful treats with nutrient-dense ingredients, such as salmon or sweet potato-based biscuits, can gently boost their spirits. Consider hand-feeding these treats during bonding moments to strengthen your connection and provide emotional support. Monitor their response and consult a veterinarian if sadness persists.
+            {% elif overall_emotion|lower == 'angry' %}
+                In light of your dog's stressed or agitated state, I advise offering calming treats formulated to reduce anxiety. Treats infused with natural ingredients like chamomile, lavender, or L-theanine can help soothe their nerves. Low-protein options are preferable to avoid exacerbating agitation. Distribute treats in a calm, distraction-free setting, and observe their behavior to identify potential stressors in their environment.
+            {% else %}
+                As your dog's emotional state appears mixed or undefined, I recommend a balanced approach with versatile, healthy treats. Opt for natural, single-ingredient treats like dehydrated vegetables or lean meat strips, which cater to a variety of moods while supporting overall wellness. Ensure treats align with your dog's dietary needs and are offered in moderation.
+            {% endif %}
+        </p>
+        <h2 class="activity">Activity Recommendations</h2>
+        <p>
+            {% if overall_emotion|lower == 'happy' %}
+                Your dog's happy and energetic state presents an excellent opportunity to engage in stimulating and socially enriching activities. Physical exercise and mental challenges will help channel their enthusiasm effectively. The following activities are tailored to maintain their positive mood and promote overall well-being:
+            {% elif overall_emotion|lower == 'relaxed' %}
+                To preserve your dog's calm and relaxed demeanor, I recommend low-intensity activities that foster tranquility and comfort. Gentle, soothing interactions will reinforce their peaceful state and enhance their sense of security. Consider the following activities to support their relaxation:
+            {% elif overall_emotion|lower == 'sad' %}
+                To address your dog's apparent sadness, I suggest engaging in comforting and reassuring activities that promote emotional security and stimulation. Gentle interaction and consistent routines can help lift their spirits. The following activities are designed to provide comfort and encouragement:
+            {% elif overall_emotion|lower == 'angry' %}
+                Given your dog's signs of stress or agitation, I recommend activities aimed at reducing tension and promoting calmness. Creating a serene environment and avoiding overstimulation are key to helping them regain balance. The following activities are suggested to alleviate their stress:
+            {% else %}
+                With a mixed or unclear emotional state, a balanced approach to activities is advisable. Incorporate a variety of low-impact and engaging exercises to support your dog's overall mental and physical health. The following activities are recommended to cater to their diverse needs:
+            {% endif %}
+        </p>
+        <ul>
+            {% for suggestion in activity_suggestions %}
+                <li>{{ suggestion }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="signature">
+        <p>Prepared by: Dr. PawMood Veterinary Analysis System</p>
+        <p>PawMood Animal Behavior Research Team</p>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMood - Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #5B21B6; /* Deep purple for a warm, friendly feel */
+            --secondary: #14B8A6; /* Teal for vibrancy */
+            --accent: #FBBF24; /* Warm yellow for highlights */
+            --light: #F9FAFB; /* Soft off-white background */
+            --dark: #1F2937; /* Dark gray for text */
+            --angry: #EF4444;
+            --happy: #22C55E;
+            --relaxed: #3B82F6;
+            --sad: #8B5CF6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 900px;
+            margin: 2rem auto;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #4C1D95;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 33, 182, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #0D9488;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+            color: #6B7280;
+        }
+
+        .btn-disabled:hover {
+            background: #D1D5DB;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #E5E7EB;
+        }
+
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .emotion-angry {
+            border-left: 5px solid var(--angry);
+        }
+
+        .emotion-happy {
+            border-left: 5px solid var(--happy);
+        }
+
+        .emotion-relaxed {
+            border-left: 5px solid var(--relaxed);
+        }
+
+        .emotion-sad {
+            border-left: 5px solid var(--sad);
+        }
+
+        .assessment-positive {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left: 5px solid var(--happy);
+        }
+
+        .assessment-concern {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 5px solid var(--angry);
+        }
+
+        .assessment-neutral {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 5px solid var(--relaxed);
+        }
+
+        .dog-speech-bubble {
+            position: relative;
+            background: #F3F4F6;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #E5E7EB;
+        }
+
+        .dog-speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #F3F4F6 transparent;
+        }
+
+        .dog-speech-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 19px;
+            border-width: 11px 11px 0;
+            border-style: solid;
+            border-color: #E5E7EB transparent;
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        .review-star {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .review-star:hover,
+        .review-star.selected {
+            color: var(--accent);
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .print-only {
+                display: block;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            .content-card {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 1rem;
+            }
+            .result-card {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            .dog-speech-bubble {
+                border: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-white p-6 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-bold flex items-center">
+                <span class="text-purple-600 mr-2">🐾</span>
+                <span>PawMood</span>
+            </a>
+            <nav>
+                <a href="/analyze" class="text-lg font-semibold hover:text-purple-600 transition">Analyze Another Dog</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow p-6">
+        <div class="content-card animate__animated animate__fadeIn">
+            {% if error %}
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 mb-6 rounded-lg">
+                    <p class="font-semibold">{{ error }}</p>
+                </div>
+                <a href="/analyze" class="btn-primary inline-block" aria-label="Try Again">Try Again</a>
+            {% else %}
+                <!-- Print header (only visible when printing) -->
+                <div class="print-only mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold flex items-center">
+                                <span class="text-purple-600 mr-2">🐾</span>
+                                <span>PawMood Report</span>
+                            </h1>
+                            <p class="text-gray-600">Generated on {{ timestamp }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">pawmood.com</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 my-4"></div>
+                </div>
+
+                <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center no-print">Your Dog's Mood Analysis</h2>
+                <p class="text-gray-600 mb-8 text-center no-print">Analyzed on {{ timestamp }}</p>
+
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="text-purple-600 mr-2">📊</span>
+                        <span>Image Analysis Results</span>
+                    </h3>
+
+                    {% for result in results %}
+                        <div class="result-card mb-6 emotion-{{ result.emotion|lower }}">
+                            <div class="flex flex-col md:flex-row">
+                                <div class="w-full md:w-1/3 p-4">
+                                    <img src="{{ result.image_data }}" class="w-full h-48 object-cover rounded-lg" alt="Uploaded Image {{ loop.index }}">
+                                </div>
+                                <div class="w-full md:w-2/3 p-6">
+                                    <div class="flex items-center mb-4">
+                                        <span class="text-3xl mr-3">{{ result.icon }}</span>
+                                        <h4 class="text-xl font-semibold capitalize">{{ result.emotion }}</h4>
+                                    </div>
+                                    <p class="text-gray-600 leading-relaxed">{{ result.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6">
+                    <div class="dog-speech-bubble">
+                        <div class="flex items-center mb-3">
+                            <span class="text-2xl mr-2">🐶</span>
+                            <h4 class="text-lg font-semibold">Your Dog Says:</h4>
+                        </div>
+                        <p id="dog-speech-text" class="text-gray-700">{{ dog_speech }}</p>
+                        <p id="speech-error" class="text-red-500 mt-2 hidden">Text-to-speech failed or is not supported. Please try Chrome or Firefox.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-4 mt-4 no-print">
+                        <button id="playAudioBtn" class="btn-secondary flex items-center">
+                            <span class="mr-2">▶️</span>
+                            <span>Play Message</span>
+                        </button>
+                        <button id="stopAudioBtn" class="btn-primary flex items-center">
+                            <span class="mr-2">⏹️</span>
+                            <span>Stop Audio</span>
+                        </button>
+                        {% if can_print %}
+                        <button id="printBtn" class="btn-primary flex items-center">
+                            <span class="mr-2">🖨️</span>
+                            <span>Print Report</span>
+                        </button>
+                        {% else %}
+                        <button id="printBtn" class="btn-disabled flex items-center" disabled>
+                            <span class="mr-2">🖨️</span>
+                            <span>Print Report (Upload 5 Images)</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="no-print mt-8">
+                    <a href="/analyze" class="text-purple-600 hover:text-purple-800 font-semibold inline-flex items-center">
+                        <span>Analyze Another Dog</span>
+                        <span class="ml-2">→</span>
+                    </a>
+                </div>
+
+                <!-- Review Form -->
+                <div class="no-print mt-8">
+                    <div class="bg-white rounded-lg p-6 border border-gray-200">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <span class="text-purple-600 mr-2">⭐</span>
+                            <span>Share Your Feedback</span>
+                        </h3>
+                        <p class="text-gray-600 mb-4">We’d love to hear your thoughts about PawMood! Your feedback helps us improve.</p>
+                        <div id="review-form">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-semibold mb-2">Rate Your Experience:</label>
+                                <div class="flex gap-2">
+                                    <span class="review-star text-2xl" data-rating="1">☆</span>
+                                    <span class="review-star text-2xl" data-rating="2">☆</span>
+                                    <span class="review-star text-2xl" data-rating="3">☆</span>
+                                    <span class="review-star text-2xl" data-rating="4">☆</span>
+                                    <span class="review-star text-2xl" data-rating="5">☆</span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="review-text" class="block text-gray-700 font-semibold mb-2">Your Review:</label>
+                                <textarea id="review-text" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" rows="4" placeholder="Tell us what you think about PawMood..."></textarea>
+                            </div>
+                            <button id="submitReviewBtn" class="btn-primary flex items-center">
+                                <span class="mr-2">📬</span>
+                                <span>Submit Feedback</span>
+                            </button>
+                            <p id="review-message" class="mt-4 text-green-600 hidden"></p>
+                            <p id="review-error" class="mt-4 text-red-500 hidden"></p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-6 text-center no-print">
+        <p class="text-sm">© 2025 PawMood. All rights reserved. Powered by Yugou Company.</p>
+    </footer>
+
+    <script>
+        const speechError = document.getElementById('speech-error');
+        const dogSpeechText = document.getElementById('dog-speech-text')?.textContent || '';
+
+        // Text-to-speech functionality
+        function playDogSpeech() {
+            if (!dogSpeechText) {
+                speechError.textContent = 'No message to play. Please try uploading images again.';
+                speechError.classList.remove('hidden');
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(dogSpeechText);
+                    const voices = window.speechSynthesis.getVoices();
+                    const englishVoice = voices.find(voice =>
+                        voice.lang.startsWith('en') &&
+                        (voice.name.includes('Female') || voice.name.includes('Karen') || voice.name.includes('Samantha'))
+                    ) || voices[0];
+
+                    if (englishVoice) {
+                        utterance.voice = englishVoice;
+                    }
+
+                    utterance.rate = 1.1;
+                    utterance.pitch = 1.2;
+                    utterance.volume = 1;
+
+                    utterance.onerror = (e) => {
+                        console.error('Speech synthesis error:', e);
+                        speechError.classList.remove('hidden');
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.error('Speech synthesis failed:', e);
+                    speechError.classList.remove('hidden');
+                }
+            } else {
+                speechError.textContent = 'Text-to-speech not supported in your browser. Try Chrome or Edge.';
+                speechError.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('playAudioBtn')?.addEventListener('click', () => {
+            speechError.classList.add('hidden');
+            playDogSpeech();
+        });
+
+        document.getElementById('stopAudioBtn')?.addEventListener('click', () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            speechError.classList.add('hidden');
+        });
+
+        // Print functionality
+        document.getElementById('printBtn')?.addEventListener('click', () => {
+            {% if can_print %}
+            fetch('/generate_report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    results: {{ results|tojson }},
+                    timestamp: "{{ timestamp }}",
+                    activity_suggestions: {{ activity_suggestions|tojson }},
+                    treat_suggestion: "{{ treat_suggestion }}",
+                    overall_emotion: "{{ overall_emotion }}",
+                    gender: "{{ gender }}",
+                    size: "{{ size }}",
+                    personality: "{{ personality }}",
+                    dog_speech: "{{ dog_speech }}",
+                    audio_path: "{{ audio_path }}",
+                    average_confidences: {{ average_confidences|tojson }}
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Failed to generate print report'); });
+                }
+                return response.text();
+            })
+            .then(html => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.onload = function() {
+                    printWindow.print();
+                };
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate print report: ' + error.message);
+            });
+            {% endif %}
+        });
+
+        // Review form functionality
+        const reviewStars = document.querySelectorAll('.review-star');
+        const reviewText = document.getElementById('review-text');
+        const submitReviewBtn = document.getElementById('submitReviewBtn');
+        const reviewMessage = document.getElementById('review-message');
+        const reviewError = document.getElementById('review-error');
+
+        let selectedRating = 0;
+
+        reviewStars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.getAttribute('data-rating'));
+                reviewStars.forEach(s => {
+                    s.classList.remove('selected');
+                    if (parseInt(s.getAttribute('data-rating')) <= selectedRating) {
+                        s.classList.add('selected');
+                    }
+                });
+            });
+        });
+
+        submitReviewBtn.addEventListener('click', () => {
+            reviewMessage.classList.add('hidden');
+            reviewError.classList.add('hidden');
+
+            if (!selectedRating) {
+                reviewError.textContent = 'Please select a rating.';
+                reviewError.classList.remove('hidden');
+                return;
+            }
+
+            if (!reviewText.value.trim()) {
+                reviewError.textContent = 'Please enter your review.';
+                reviewError.classList.remove('hidden');
+                return;
+            }
+
+            fetch('/submit_review', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    review_text: reviewText.value.trim(),
+                    rating: selectedRating
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Failed to submit review'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                reviewMessage.textContent = data.message;
+                reviewMessage.classList.remove('hidden');
+                submitReviewBtn.disabled = true;
+                submitReviewBtn.classList.add('btn-disabled');
+                reviewText.disabled = true;
+                reviewStars.forEach(star => star.style.pointerEvents = 'none');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                reviewError.textContent = error.message;
+                reviewError.classList.remove('hidden');
+            });
+        });
+
+        // Add animation on scroll
+        const animateOnScroll = function() {
+            const elements = document.querySelectorAll('.result-card, .dog-speech-bubble, #review-form');
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (elementPosition < windowHeight - 100) {
+                    element.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', animateOnScroll);
+        window.addEventListener('load', animateOnScroll);
+    </script>
+</body>
+</html>

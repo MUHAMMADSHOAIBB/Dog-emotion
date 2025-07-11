@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMood - Analyze Dog Emotions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+        }
+        body { font-family:'Poppins',sans-serif; background:var(--light); color:var(--dark);}        
+        .gradient-bg { background:linear-gradient(135deg,rgba(79,70,229,.1)0%,rgba(16,185,129,.1)100%);}        
+        .content-card{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,.05);border:1px solid rgba(255,255,255,.2);}        
+        .btn-primary{background:var(--primary);transition:.3s;box-shadow:0 4px 15px rgba(79,70,229,.3);}        
+        .btn-primary:hover{background:#4338ca;transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,70,229,.4);}        
+        .btn-secondary{background:var(--secondary);transition:.3s;box-shadow:0 4px 15px rgba(16,185,129,.3);}        
+        .btn-secondary:hover{background:#0d9488;transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.4);}        
+        .input-focus{transition:.3s;border:1px solid #e2e8f0;}        
+        .input-focus:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.2);}        
+        .spinner{display:none;border:4px solid rgba(79,70,229,.1);border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto;}        
+        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}        
+        .preview-img{transition:transform .3s,box-shadow .3s;border:2px solid #e2e8f0;}        
+        .preview-img:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.1);}        
+        .clear-btn{transition:.3s;background:#ef4444;color:#fff;}        
+        .clear-btn:hover{transform:scale(1.2);background:#dc2626;}        
+        .dog-paw{position:absolute;opacity:.1;z-index:0;}        
+        .dog-paw-1{top:10%;left:5%;transform:rotate(20deg);font-size:5rem;}        
+        .dog-paw-2{bottom:15%;right:8%;transform:rotate(-15deg);font-size:4rem;}        
+        .tooltip{position:relative;display:inline-block;}        
+        .tooltip .tooltiptext{visibility:hidden;width:200px;background:var(--dark);color:#fff;text-align:center;border-radius:6px;padding:5px;position:absolute;z-index:1;bottom:125%;left:50%;transform:translateX(-50%);opacity:0;transition:opacity .3s;}        
+        .tooltip:hover .tooltiptext{visibility:visible;opacity:1;}    
+        .character-card {
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .character-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(16,185,129,0.1));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79,70,229,0.3);
+        }
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .male-avatar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .female-avatar {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        .character-name {
+            font-weight: 600;
+            color: var(--dark);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .gender-section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <span class="dog-paw dog-paw-1">🐾</span>
+    <span class="dog-paw dog-paw-2">🐾</span>
+    <header class="bg-white text-gray-800 p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-bold flex items-center">
+                <span class="text-indigo-600 mr-2">🐾</span>
+                <span>PawMood</span>
+            </a>
+            <nav>
+                <a href="/" class="text-lg font-semibold hover:text-indigo-600 transition">← Back to Home</a>
+            </nav>
+        </div>
+    </header>
+    <main class="flex-grow max-w-7xl mx-auto p-6 w-full">
+        <div class="content-card rounded-xl p-8 animate__animated animate__fadeIn">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Analyze Dog Emotions</h2>
+            <p class="text-xl text-gray-600 mb-8 text-center">Select your dog's character and upload clear face photos for accurate results</p>
+            <form id="dogForm" action="/predict" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <input type="hidden" id="gender" name="gender" value="">
+                <input type="hidden" id="size" name="size" value="">
+                <input type="hidden" id="personality" name="personality" value="">
+                <div class="space-y-6">
+                    <h3 class="section-title">🎭 Select Your Dog's Character</h3>
+                    <div class="gender-section">
+                        <h4 class="text-lg font-semibold text-blue-600 mb-4 text-center">🚹 Male Characters</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="character-card" data-gender="Male" data-size="Big" data-personality="Fierce">
+                                <div class="character-avatar male-avatar">⚔️</div>
+                                <div class="character-name">Fierce Warrior</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Small" data-personality="Fierce">
+                                <div class="character-avatar male-avatar">🗡️</div>
+                                <div class="character-name">Yun Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Big" data-personality="Cute">
+                                <div class="character-avatar male-avatar">🤗</div>
+                                <div class="character-name">Gentle Buddy</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Small" data-personality="Cute">
+                                <div class="character-avatar male-avatar">😊</div>
+                                <div class="character-name">Young Pup</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Big" data-personality="Dominant">
+                                <div class="character-avatar male-avatar">👑</div>
+                                <div class="character-name">Emperor Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Small" data-personality="Dominant">
+                                <div class="character-avatar male-avatar">💼</div>
+                                <div class="character-name">Boss Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Big" data-personality="Playful">
+                                <div class="character-avatar male-avatar">🎮</div>
+                                <div class="character-name">Anime Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Male" data-size="Small" data-personality="Playful">
+                                <div class="character-avatar male-avatar">🧸</div>
+                                <div class="character-name">Playful Pup</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gender-section">
+                        <h4 class="text-lg font-semibold text-pink-600 mb-4 text-center">🚺 Female Characters</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="character-card" data-gender="Female" data-size="Big" data-personality="Fierce">
+                                <div class="character-avatar female-avatar">🛡️</div>
+                                <div class="character-name">Heroine Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Small" data-personality="Fierce">
+                                <div class="character-avatar female-avatar">😤</div>
+                                <div class="character-name">Feisty Pup</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Big" data-personality="Cute">
+                                <div class="character-avatar female-avatar">📚</div>
+                                <div class="character-name">Sweet Senior</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Small" data-personality="Cute">
+                                <div class="character-avatar female-avatar">🎀</div>
+                                <div class="character-name">Little Cutie</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Big" data-personality="Dominant">
+                                <div class="character-avatar female-avatar">👸</div>
+                                <div class="character-name">Queen Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Small" data-personality="Dominant">
+                                <div class="character-avatar female-avatar">💅</div>
+                                <div class="character-name">Diva Dog</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Big" data-personality="Playful">
+                                <div class="character-avatar female-avatar">🌸</div>
+                                <div class="character-name">Playful Sister</div>
+                            </div>
+                            <div class="character-card" data-gender="Female" data-size="Small" data-personality="Playful">
+                                <div class="character-avatar female-avatar">💪</div>
+                                <div class="character-name">Tough Girl</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Upload Images (1-5)</label>
+                    <div class="relative">
+                        <input type="file" id="images" name="images" accept="image/*" multiple class="w-full p-3 border border-gray-300 rounded-lg input-focus focus:outline-none" style="height: 120px; padding-top: 45px;">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-gray-500">
+                            <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <span class="text-sm font-medium">Click to select images or drag and drop here</span>
+                            <span class="text-xs mt-1">Supports 1-5 images</span>
+                        </div>
+                    </div>
+                    <div id="fileList" class="mt-4 space-y-2 hidden">
+                        <h4 class="text-sm font-medium text-gray-700">Selected Files:</h4>
+                        <div id="fileItems" class="space-y-1"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center gap-6 pt-4">
+                    <button type="submit" id="submitBtn" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold flex items-center justify-center">
+                        <span id="submitText">Start Analysis</span>
+                        <span id="spinner" class="spinner ml-2 hidden"></span>
+                    </button>
+                    <button type="button" id="clearBtn" class="btn-secondary text-white px-8 py-3 rounded-lg font-semibold">Clear Form</button>
+                </div>
+                <div class="preview-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8" id="previewContainer"></div>
+                <p id="error" class="text-red-500 mt-6 text-center hidden"></p>
+                <div class="mt-12 gradient-bg rounded-xl p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="text-indigo-600 mr-2">📸</span>
+                        Tips for Best Results
+                    </h3>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Use natural lighting to avoid shadows on the face</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Capture front-facing shots, as side angles are harder to analyze</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Capture different expressions for higher accuracy</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Avoid blurry or dark images</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Upload 3-5 images of the same dog for comprehensive analysis</span></li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer class="bg-gray-900 text-white p-6 text-center">
+        <p class="text-sm">© 2025 PawMood. All rights reserved. Powered by Yugou Company.</p>
+    </footer>
+    <script>
+        const imageInput = document.getElementById('images');
+        const fileList = document.getElementById('fileList');
+        const fileItems = document.getElementById('fileItems');
+        const previewContainer = document.getElementById('previewContainer');
+        const error = document.getElementById('error');
+        const spinner = document.getElementById('spinner');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const characterCards = document.querySelectorAll('.character-card');
+        const genderInput = document.getElementById('gender');
+        const sizeInput = document.getElementById('size');
+        const personalityInput = document.getElementById('personality');
+        let selectedFiles = [];
+        characterCards.forEach(card => {
+            card.addEventListener('click', () => {
+                characterCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                genderInput.value = card.dataset.gender;
+                sizeInput.value = card.dataset.size;
+                personalityInput.value = card.dataset.personality;
+            });
+        });
+        imageInput.addEventListener('change', function(e) {
+            error.classList.add('hidden');
+            const files = Array.from(e.target.files);
+            if (files.length > 5) {
+                error.textContent = 'You can select up to 5 images only.';
+                error.classList.remove('hidden');
+                return;
+            }
+            selectedFiles = files;
+            updateFileList();
+            updatePreview();
+        });
+        function updateFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.classList.add('hidden');
+                return;
+            }
+            fileList.classList.remove('hidden');
+            fileItems.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded';
+                fileItem.innerHTML = `
+                    <span class="text-sm text-gray-700">${file.name}</span>
+                    <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFile(${index})">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+                fileItems.appendChild(fileItem);
+            });
+        }
+        function updatePreview() {
+            previewContainer.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                if (!file.type.startsWith('image/')) {
+                    error.textContent = `File "${file.name}" is not a valid image format.`;
+                    error.classList.remove('hidden');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'relative';
+                    previewDiv.innerHTML = `
+                        <img class="preview-img rounded-lg shadow-md w-full h-48 object-cover" src="${e.target.result}" alt="Preview Image ${index + 1}">
+                        <button type="button" class="clear-btn absolute top-3 right-3 text-white rounded-full w-8 h-8 flex items-center justify-center" onclick="removeFile(${index})" aria-label="Remove Image ${index + 1}">×</button>
+                    `;
+                    previewContainer.appendChild(previewDiv);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            imageInput.files = dt.files;
+            updateFileList();
+            updatePreview();
+        }
+        document.getElementById('dogForm').addEventListener('submit', function(e) {
+            error.classList.add('hidden');
+            if (!genderInput.value || !sizeInput.value || !personalityInput.value) {
+                e.preventDefault();
+                error.textContent = 'Please select a dog character.';
+                error.classList.remove('hidden');
+                return;
+            }
+            if (selectedFiles.length === 0) {
+                e.preventDefault();
+                error.textContent = 'Please upload at least one image.';
+                error.classList.remove('hidden');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitText.textContent = 'Analyzing...';
+            spinner.classList.remove('hidden');
+        });
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('dogForm').reset();
+            characterCards.forEach(c => c.classList.remove('selected'));
+            genderInput.value = '';
+            sizeInput.value = '';
+            personalityInput.value = '';
+            selectedFiles = [];
+            updateFileList();
+            updatePreview();
+            error.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Start Analysis';
+            spinner.classList.add('hidden');
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.character-card, input, button').forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all .5s ease ' + (i * 0.05) + 's';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
