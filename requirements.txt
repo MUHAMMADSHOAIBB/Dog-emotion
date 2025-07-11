@@ -2,5 +2,5 @@ Flask==3.1.1
 pandas==2.3.1
 Pillow==11.3.0
 torch==2.7.1
-torchvision==0.18.1
+torchvision==0.20 Schwab
 gunicorn==22.0.0
